@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Depth First Search</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+<style>
+    :root {
+        --primary-color: #222222;         /* Elegant black */
+        --accent-color: #444444;          /* Soft black for headings */
+        --text-color: #2a2a2a;            /* Dark gray for readability */
+        --light-text: #6e6e6e;            /* Subtle text/meta elements */
+        --bg-color: #fdfaf6;              /* Creamy white background */
+        --card-bg: #ffffff;               /* White cards for contrast */
+        --header-bg: #222222;             /* Strong black header */
+        --border-radius: 10px;
+        --transition: all 0.3s ease-in-out;
+    }
+
+    body {
+        font-family: "Inter", "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+        line-height: 1.75;
+        color: var(--text-color);
+        background-color: var(--bg-color);
+        margin: 0;
+        padding: 0;
+    }
+
+    header {
+        background-color: var(--header-bg);
+        color: #ffffff;
+        padding: 2rem 0;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 2.5rem;
+        letter-spacing: -0.4px;
+    }
+
+    .container {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+    }
+
+    .blog-list {
+        margin-top: 2.5rem;
+    }
+
+    .blog-card {
+        background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+        transition: var(--transition);
+        cursor: pointer;
+        border: 1px solid #eaeaea;
+    }
+
+    .blog-card:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    }
+
+    .blog-card a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .blog-card h2 {
+        margin-top: 0;
+        color: var(--accent-color);
+        font-size: 1.625rem;
+        margin-bottom: 0.35rem;
+        line-height: 1.4;
+    }
+
+    .blog-card .date {
+        color: var(--light-text);
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .blog-card p {
+        margin-bottom: 1.25rem;
+    }
+
+    .read-more {
+        display: inline-flex;
+        align-items: center;
+        color: var(--accent-color);
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .read-more::after {
+        content: "→";
+        display: inline-block;
+        margin-left: 6px;
+        transition: var(--transition);
+    }
+
+    .blog-card:hover .read-more::after {
+        transform: translateX(3px);
+    }
+
+    .blog-content {
+        margin-top: 2rem;
+        line-height: 1.8;
+    }
+
+    .blog-content h1 {
+        font-size: 2.25rem;
+        margin-bottom: 0.5rem;
+        color: var(--accent-color);
+    }
+
+    .blog-content h2 {
+        font-size: 1.5rem;
+        margin-top: 2rem;
+        color: var(--accent-color);
+    }
+
+    .blog-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        margin: 1.5rem 0;
+    }
+
+    .blog-content p,
+    .blog-content ul,
+    .blog-content ol {
+        margin-bottom: 1.5rem;
+    }
+
+    .blog-content blockquote {
+        border-left: 4px solid var(--accent-color);
+        padding-left: 1rem;
+        color: var(--light-text);
+        font-style: italic;
+        margin: 1.5rem 0;
+    }
+
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        color: var(--accent-color);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+    }
+
+    .back-button::before {
+        content: "←";
+        margin-right: 6px;
+        transition: var(--transition);
+    }
+
+    .back-button:hover::before {
+        transform: translateX(-3px);
+    }
+
+    .error-message {
+        color: #b00020;
+        background-color: #fff0f0;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+        border: 1px solid #ffd6d6;
+    }
+
+    .loading {
+        text-align: center;
+        padding: 3rem 0;
+        color: var(--light-text);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .loading::before {
+        content: "";
+        width: 40px;
+        height: 40px;
+        border: 3px solid #ddd;
+        border-top-color: var(--primary-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 1rem;
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    @media (max-width: 600px) {
+        header h1 {
+            font-size: 1.75rem;
+        }
+
+        .blog-card {
+            padding: 1.25rem;
+        }
+
+        .container {
+            padding: 1rem;
+        }
+
+        .blog-card h2 {
+            font-size: 1.375rem;
+        }
+    }
+
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --primary-color: #ffffff;
+            --accent-color: #dddddd;
+            --text-color: #f0f0f0;
+            --light-text: #aaaaaa;
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --header-bg: #000000;
+        }
+
+        .blog-card {
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .error-message {
+            background-color: #3b0a1a;
+            border-color: #702c3e;
+        }
+
+        .loading::before {
+            border-color: #444;
+            border-top-color: var(--primary-color);
+        }
+    }
+</style>
+
+
+
+
+    <script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],   // allow $…$   and  \(...\)
+    displayMath: [['$$', '$$'], ['\\[', '\\]']],// allow $$…$$ and  \[...\]
+    processEscapes: true                        // still lets you write \$ etc.
+  },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async
+        src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+
+
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Depth First Search</h1>
+        </div>
+    </header>
+
+    <div class="container" id="app">
+        <div id="content"></div>
+    </div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            // Use relative paths - works both locally and in S3
+            bucketUrl: '',
+            // The file that lists all your blog posts
+            indexFile: 'posts/index.json',
+            // The folder where your markdown files are stored
+            postsFolder: 'posts/'
+        };
+
+        // Main application
+        const app = {
+            // Current view state (can be 'list' or 'post')
+            currentView: 'list',
+            // Current post being viewed
+            currentPost: null,
+            // List of all blog posts
+            posts: [],
+
+            // Initialize the application
+            init: async function() {
+                // Set up event listeners
+                window.addEventListener('hashchange', this.handleRouting.bind(this));
+                
+                // Handle initial routing
+                await this.handleRouting();
+            },
+
+            // Handle routing based on URL hash
+            handleRouting: async function() {
+                const hash = window.location.hash.substring(1); // Remove the # symbol
+                
+                if (hash.startsWith('post/')) {
+                    // Extract the post filename from the hash
+                    const postFile = hash.substring(5); // Remove 'post/'
+                    await this.showPost(postFile);
+                } else {
+                    // Default to showing the list of posts
+                    await this.showPostsList();
+                }
+            },
+
+            // Show the list of blog posts
+            showPostsList: async function() {
+                this.currentView = 'list';
+                
+                // Show loading state
+                document.getElementById('content').innerHTML = '<div class="loading">Loading blog posts...</div>';
+                
+                try {
+                    // Try to load the posts index
+                    await this.loadPosts();
+                    this.renderPostsList();
+                } catch (error) {
+                    console.error('Error loading posts:', error);
+                    this.showError('Could not load blog posts. Please check your configuration.');
+                }
+            },
+
+            // Load the list of blog posts
+            loadPosts: async function() {
+                try {
+                    // First approach: Try to load the index.json file if it exists
+                    const response = await fetch(`${CONFIG.bucketUrl}${CONFIG.indexFile}`);
+                    
+                    if (response.ok) {
+                        this.posts = await response.json();
+                        // Sort posts by date (newest first)
+                        this.posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+                        return;
+                    }
+                } catch (error) {
+                    console.warn('No index.json file found, trying S3 listing fallback...');
+                }
+
+                // If we get here, we need to implement a fallback method
+                // This is a simplified example - in a real implementation, you'd need 
+                // to create a server-side solution or use AWS Lambda to generate an index
+                this.showError('No post index found. Please create an index.json file in your posts folder.');
+            },
+
+            // Render the list of blog posts
+            renderPostsList: function() {
+                if (this.posts.length === 0) {
+                    document.getElementById('content').innerHTML = `
+                        <div class="blog-list">
+                            <p>No blog posts found. Add your first Markdown file to get started!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const postsHtml = this.posts.map(post => `
+                    <article class="blog-card" onclick="window.location.href='#post/${post.filename}';" style="cursor: pointer;">
+                        <h2>${post.title}</h2>
+                        <div class="date">${new Date(post.date).toLocaleDateString()}</div>
+                        <p>${post.excerpt}</p>
+                        <div class="read-more">Read more</div>
+                    </article>
+                `).join('');
+
+                document.getElementById('content').innerHTML = `
+                    <div class="blog-list">
+                        ${postsHtml}
+                    </div>
+                `;
+            },
+
+            // Show a single blog post
+            showPost: async function(postFile) {
+                this.currentView = 'post';
+                this.currentPost = postFile;
+                
+                // Show loading state
+                document.getElementById('content').innerHTML = '<div class="loading">Loading post...</div>';
+                
+                try {
+                    const response = await fetch(`${CONFIG.bucketUrl}${CONFIG.postsFolder}${postFile}`);
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to load post: ${response.status}`);
+                    }
+                    
+                    const markdown = await response.text();
+                    this.renderPost(markdown);
+                } catch (error) {
+                    console.error('Error loading post:', error);
+                    this.showError('Could not load the requested blog post.');
+                }
+            },
+
+            // Render a single blog post
+            renderPost: function(markdown) {
+                // Parse the frontmatter (if any)
+                let frontmatter = {};
+                let content = markdown;
+                
+                // Check for frontmatter (between --- tags)
+                const frontmatterMatch = markdown.match(/^---\s*$([\s\S]*?)^---\s*$([\s\S]*)/m);
+                
+                if (frontmatterMatch) {
+                    // Extract the frontmatter and content
+                    const frontmatterString = frontmatterMatch[1];
+                    content = frontmatterMatch[2];
+                    
+                    // Parse the frontmatter
+                    frontmatterString.split('\n').forEach(line => {
+                        const parts = line.split(':');
+                        if (parts.length >= 2) {
+                            const key = parts[0].trim();
+                            const value = parts.slice(1).join(':').trim();
+                            if (key && value) {
+                                frontmatter[key] = value;
+                            }
+                        }
+                    });
+                }
+                
+                // Convert markdown to HTML
+                const htmlContent = marked.parse(content);
+                
+                // Create the HTML for the blog post
+                const postHtml = `
+                    <a href="#" class="back-button">Back to all posts</a>
+                    <article class="blog-content">
+                        <h1>${frontmatter.title || 'Untitled Post'}</h1>
+                        ${frontmatter.date ? `<div class="date">${new Date(frontmatter.date).toLocaleDateString()}</div>` : ''}
+                        ${htmlContent}
+                    </article>
+                `;
+                
+                document.getElementById('content').innerHTML = postHtml;
+                if (window.MathJax && window.MathJax.typesetPromise) {
+                    MathJax.typesetPromise();
+                }
+
+            },
+
+            // Show an error message
+            showError: function(message) {
+                document.getElementById('content').innerHTML = `
+                    <div class="error-message">
+                        ${message}
+                    </div>
+                    <a href="#" class="back-button">← Back to all posts</a>
+                `;
+            }
+        };
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+</html>
